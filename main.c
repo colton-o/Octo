@@ -29,6 +29,10 @@ void set_tentacle(tentacle *t) {
   t->cur_pos.x = octopus->x + t->orig_pos.x;
   t->cur_pos.y = octopus->y + t->orig_pos.y;
 }
+void set_tentacle_distance(tentacle *t) {
+  t->distance = sqrt(pow(t->cur_pos.x - (t->orig_pos.x + octopus->x), 2) +
+                     pow(t->cur_pos.y - (t->orig_pos.y + octopus->y), 2));
+}
 int main(void) {
   octopus = malloc(sizeof(SDL_Rect));
   octopus->h = 25;
@@ -39,26 +43,26 @@ int main(void) {
   tentacles[0].orig_pos.x = 0;
   tentacles[0].orig_pos.y = -100;
 
-  tentacles[1].orig_pos.x = 50;
-  tentacles[1].orig_pos.y = -50;
+  tentacles[1].orig_pos.x = 100;
+  tentacles[1].orig_pos.y = -100;
 
   tentacles[2].orig_pos.x = 100;
   tentacles[2].orig_pos.y = 0;
 
-  tentacles[3].orig_pos.x = 50;
-  tentacles[3].orig_pos.y = 50;
+  tentacles[3].orig_pos.x = 100;
+  tentacles[3].orig_pos.y = 100;
 
   tentacles[4].orig_pos.x = 0;
   tentacles[4].orig_pos.y = 100;
 
-  tentacles[5].orig_pos.x = -50;
+  tentacles[5].orig_pos.x = -100;
   tentacles[5].orig_pos.y = 50;
 
   tentacles[6].orig_pos.x = -100;
   tentacles[6].orig_pos.y = 0;
 
-  tentacles[7].orig_pos.x = -50;
-  tentacles[7].orig_pos.y = -50;
+  tentacles[7].orig_pos.x = -100;
+  tentacles[7].orig_pos.y = -100;
 
   uint32_t framestart;
 
@@ -122,16 +126,9 @@ int main(void) {
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 100);
     SDL_RenderFillRect(renderer, octopus);
     for (int i = 0; i < 8; i++) {
-      tentacles[i].distance = fabs(sqrt(
-          ((tentacles[i].cur_pos.x -
-            (tentacles[i].orig_pos.x + octopus->x) *
-                (tentacles[i].cur_pos.x -
-                 (tentacles[i].orig_pos.x + octopus->x))) +
-           ((tentacles[i].cur_pos.y - (tentacles[i].orig_pos.y + octopus->y)) *
-            (tentacles[i].cur_pos.y -
-             (tentacles[i].orig_pos.y + octopus->y))))));
+      set_tentacle_distance(&tentacles[i]);
 
-      if (tentacles[i].distance > 90)
+      if (tentacles[i].distance > 350)
         set_tentacle(&tentacles[i]);
 
       SDL_RenderDrawLine(renderer, octopus->x + (octopus->w / 2),
