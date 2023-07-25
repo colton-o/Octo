@@ -1,33 +1,23 @@
-#include <SDL2/SDL_rect.h>
-#define SDL_MAIN_HANDLED
+#include "bezier.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <math.h>
+
 #define WINX 1000
 #define WINY 1000
 #define CURVE 50
-
+#define SDL_MAIN_HANDLED
 const int SCREEN_FPS = 100;
 const int SCREEN_TICK = 1000 / 60;
 
 int speed = 5;
 
-typedef struct {
-  int x;
-  int y;
-} vector_2;
-
-typedef struct {
-  vector_2 a;
-  vector_2 b;
-  vector_2 c;
-  vector_2 d;
-} curve;
-
 SDL_Point curve_points[CURVE] = {0};
 
 vector_2 velocity;
 vector_2 position;
+
 typedef struct {
   vector_2 orig_pos;
   curve tentacle_pos;
@@ -38,6 +28,8 @@ tentacle tentacles[8] = {0};
 SDL_Rect *octopus;
 
 void set_tentacle(tentacle *t) {
+  t->tentacle_pos.a.x = octopus->x;
+  t->tentacle_pos.a.x = octopus->x;
   t->tentacle_pos.d.x = octopus->x + t->orig_pos.x;
   t->tentacle_pos.d.y = octopus->y + t->orig_pos.y;
 }
@@ -137,26 +129,17 @@ int main(void) {
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 100);
     SDL_RenderFillRect(renderer, octopus);
+
     for (int i = 0; i < 8; i++) {
       set_tentacle_distance(&tentacles[i]);
 
       if (tentacles[i].distance > 300 || tentacles[i].distance < 1)
         set_tentacle(&tentacles[i]);
-    }
 
-    for (int i = 0; i < CURVE; i++) {
-      float step = (float)i / CURVE;
-      curve_points[i].x = (pow(1 - step, 3) * my_curve.a.x) +
-                          (3 * pow(1 - step, 3) * step * my_curve.b.x) +
-                          (3 * (1 - step) * pow(step, 2) * my_curve.c.x) +
-                          (pow(step, 3) * my_curve.d.x);
+      set_curve(tentacles[i].tentacle_pos, CURVE, curve_points);
 
-      curve_points[i].y = (pow(1 - step, 3) * my_curve.a.y) +
-                          (3 * pow(1 - step, 3) * step * my_curve.b.y) +
-                          (3 * (1 - step) * pow(step, 2) * my_curve.c.y) +
-                          (pow(step, 3) * my_curve.d.y);
+      SDL_RenderDrawLines(renderer, curve_points, CURVE);
     }
-    SDL_RenderDrawLines(renderer, curve_points, CURVE);
 
     SDL_RenderPresent(renderer);
     frametime = SDL_GetTicks64() - framestart;

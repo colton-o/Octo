@@ -1,2 +1,2 @@
 main:main.c
-	cc main.c -lSDL2 -lm -o octo -g
+	cc main.c bezier.c -lSDL2 -lm -o octo -g
