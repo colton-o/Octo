@@ -10,14 +10,12 @@ const int SCREEN_TICK = 1000 / 60;
 
 int speed = 5;
 
-typedef struct
-{
+typedef struct {
   int x;
   int y;
 } vector_2;
 
-typedef struct
-{
+typedef struct {
   vector_2 a;
   vector_2 b;
   vector_2 c;
@@ -26,8 +24,7 @@ typedef struct
 
 vector_2 velocity;
 vector_2 position;
-typedef struct
-{
+typedef struct {
   vector_2 cur_pos;
   vector_2 orig_pos;
   int distance;
@@ -36,18 +33,15 @@ typedef struct
 tentacle tentacles[8] = {0};
 SDL_Rect *octopus;
 
-void set_tentacle(tentacle *t)
-{
+void set_tentacle(tentacle *t) {
   t->cur_pos.x = octopus->x + t->orig_pos.x;
   t->cur_pos.y = octopus->y + t->orig_pos.y;
 }
-void set_tentacle_distance(tentacle *t)
-{
+void set_tentacle_distance(tentacle *t) {
   t->distance = sqrt(pow(t->cur_pos.x - (octopus->x), 2) +
                      pow(t->cur_pos.y - (octopus->y), 2));
 }
-int main(void)
-{
+int main(void) {
   octopus = malloc(sizeof(SDL_Rect));
   octopus->h = 25;
   octopus->w = 25;
@@ -80,7 +74,7 @@ int main(void)
 
   uint32_t framestart;
 
-  curve my_curve = {{0, 0}, {80, 120}, {250, 500}, {700, 700}};
+  curve my_curve = {{200, 500}, {250, 300}, {400, 600}, {800, 500}};
 
   int frametime;
   SDL_Init(SDL_INIT_VIDEO);
@@ -93,16 +87,12 @@ int main(void)
   SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
   SDL_RenderClear(renderer);
   SDL_Event event;
-  while (1)
-  {
+  while (1) {
     framestart = SDL_GetTicks64();
-    while (SDL_PollEvent(&event))
-    {
-      switch (event.type)
-      {
+    while (SDL_PollEvent(&event)) {
+      switch (event.type) {
       case SDL_KEYDOWN:
-        switch (event.key.keysym.sym)
-        {
+        switch (event.key.keysym.sym) {
         case SDLK_w:
           velocity.y = -1;
           break;
@@ -118,8 +108,7 @@ int main(void)
         }
         break;
       case SDL_KEYUP:
-        switch (event.key.keysym.sym)
-        {
+        switch (event.key.keysym.sym) {
         case SDLK_w:
           velocity.y = 0;
           break;
@@ -146,8 +135,7 @@ int main(void)
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 100);
     SDL_RenderFillRect(renderer, octopus);
-    for (int i = 0; i < 8; i++)
-    {
+    for (int i = 0; i < 8; i++) {
       set_tentacle_distance(&tentacles[i]);
 
       if (tentacles[i].distance > 300 || tentacles[i].distance < 1)
@@ -158,8 +146,7 @@ int main(void)
                          tentacles[i].cur_pos.y);
     }
 
-    for (int i = 0; i < 1000; i++)
-    {
+    for (int i = 0; i < 1000; i++) {
       float step = (float)i / 1000;
       int x = (pow(1 - step, 3) * my_curve.a.x) +
               (3 * pow(1 - step, 3) * step * my_curve.b.x) +
@@ -172,18 +159,33 @@ int main(void)
               (pow(step, 3) * my_curve.d.y);
 
       SDL_RenderDrawPoint(renderer, x, y);
+
+      for (int j = 2; j > step * 2; j--) {
+        SDL_RenderDrawPoint(renderer, x + j, y);
+        SDL_RenderDrawPoint(renderer, x - j, y);
+        SDL_RenderDrawPoint(renderer, x, y + j);
+        SDL_RenderDrawPoint(renderer, x, y - j);
+      }
     }
 
     my_curve.b.x++;
+    my_curve.a.y--;
+    my_curve.d.x--;
+    my_curve.c.y++;
+    my_curve.c.x++;
 
-    // SDL_RenderDrawLine(renderer, my_curve.a.x, my_curve.a.y, my_curve.b.x, my_curve.b.y);
-    // SDL_RenderDrawLine(renderer, my_curve.b.x, my_curve.b.y, my_curve.c.x, my_curve.c.y);
-    // SDL_RenderDrawLine(renderer, my_curve.c.x, my_curve.c.y, my_curve.d.x, my_curve.d.y);
+    my_curve.b.x++;
+
+    SDL_RenderDrawLine(renderer, my_curve.a.x, my_curve.a.y, my_curve.b.x,
+                       my_curve.b.y);
+    SDL_RenderDrawLine(renderer, my_curve.b.x, my_curve.b.y, my_curve.c.x,
+                       my_curve.c.y);
+    SDL_RenderDrawLine(renderer, my_curve.c.x, my_curve.c.y, my_curve.d.x,
+                       my_curve.d.y);
 
     SDL_RenderPresent(renderer);
     frametime = SDL_GetTicks64() - framestart;
-    if (SCREEN_TICK > frametime)
-    {
+    if (SCREEN_TICK > frametime) {
       SDL_Delay(SCREEN_TICK - frametime);
     }
   }
