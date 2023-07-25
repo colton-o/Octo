@@ -1,9 +1,11 @@
+#include <SDL2/SDL_rect.h>
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
 #include <math.h>
 #define WINX 1000
 #define WINY 1000
+#define CURVE 50
 
 const int SCREEN_FPS = 100;
 const int SCREEN_TICK = 1000 / 60;
@@ -22,11 +24,13 @@ typedef struct {
   vector_2 d;
 } curve;
 
+SDL_Point curve_points[CURVE] = {0};
+
 vector_2 velocity;
 vector_2 position;
 typedef struct {
-  vector_2 cur_pos;
   vector_2 orig_pos;
+  curve tentacle_pos;
   int distance;
 } tentacle;
 
@@ -34,12 +38,12 @@ tentacle tentacles[8] = {0};
 SDL_Rect *octopus;
 
 void set_tentacle(tentacle *t) {
-  t->cur_pos.x = octopus->x + t->orig_pos.x;
-  t->cur_pos.y = octopus->y + t->orig_pos.y;
+  t->tentacle_pos.d.x = octopus->x + t->orig_pos.x;
+  t->tentacle_pos.d.y = octopus->y + t->orig_pos.y;
 }
 void set_tentacle_distance(tentacle *t) {
-  t->distance = sqrt(pow(t->cur_pos.x - (octopus->x), 2) +
-                     pow(t->cur_pos.y - (octopus->y), 2));
+  t->distance = sqrt(pow(t->tentacle_pos.d.x - (octopus->x), 2) +
+                     pow(t->tentacle_pos.d.y - (octopus->y), 2));
 }
 int main(void) {
   octopus = malloc(sizeof(SDL_Rect));
@@ -73,8 +77,6 @@ int main(void) {
   tentacles[7].orig_pos.y = -100;
 
   uint32_t framestart;
-
-  curve my_curve = {{200, 500}, {250, 300}, {400, 600}, {800, 500}};
 
   int frametime;
   SDL_Init(SDL_INIT_VIDEO);
@@ -140,48 +142,21 @@ int main(void) {
 
       if (tentacles[i].distance > 300 || tentacles[i].distance < 1)
         set_tentacle(&tentacles[i]);
-
-      SDL_RenderDrawLine(renderer, octopus->x + (octopus->w / 2),
-                         octopus->y + (octopus->h / 2), tentacles[i].cur_pos.x,
-                         tentacles[i].cur_pos.y);
     }
 
-    for (int i = 0; i < 1000; i++) {
-      float step = (float)i / 1000;
-      int x = (pow(1 - step, 3) * my_curve.a.x) +
-              (3 * pow(1 - step, 3) * step * my_curve.b.x) +
-              (3 * (1 - step) * pow(step, 2) * my_curve.c.x) +
-              (pow(step, 3) * my_curve.d.x);
+    for (int i = 0; i < CURVE; i++) {
+      float step = (float)i / CURVE;
+      curve_points[i].x = (pow(1 - step, 3) * my_curve.a.x) +
+                          (3 * pow(1 - step, 3) * step * my_curve.b.x) +
+                          (3 * (1 - step) * pow(step, 2) * my_curve.c.x) +
+                          (pow(step, 3) * my_curve.d.x);
 
-      int y = (pow(1 - step, 3) * my_curve.a.y) +
-              (3 * pow(1 - step, 3) * step * my_curve.b.y) +
-              (3 * (1 - step) * pow(step, 2) * my_curve.c.y) +
-              (pow(step, 3) * my_curve.d.y);
-
-      SDL_RenderDrawPoint(renderer, x, y);
-
-      for (int j = 2; j > step * 2; j--) {
-        SDL_RenderDrawPoint(renderer, x + j, y);
-        SDL_RenderDrawPoint(renderer, x - j, y);
-        SDL_RenderDrawPoint(renderer, x, y + j);
-        SDL_RenderDrawPoint(renderer, x, y - j);
-      }
+      curve_points[i].y = (pow(1 - step, 3) * my_curve.a.y) +
+                          (3 * pow(1 - step, 3) * step * my_curve.b.y) +
+                          (3 * (1 - step) * pow(step, 2) * my_curve.c.y) +
+                          (pow(step, 3) * my_curve.d.y);
     }
-
-    my_curve.b.x++;
-    my_curve.a.y--;
-    my_curve.d.x--;
-    my_curve.c.y++;
-    my_curve.c.x++;
-
-    my_curve.b.x++;
-
-    SDL_RenderDrawLine(renderer, my_curve.a.x, my_curve.a.y, my_curve.b.x,
-                       my_curve.b.y);
-    SDL_RenderDrawLine(renderer, my_curve.b.x, my_curve.b.y, my_curve.c.x,
-                       my_curve.c.y);
-    SDL_RenderDrawLine(renderer, my_curve.c.x, my_curve.c.y, my_curve.d.x,
-                       my_curve.d.y);
+    SDL_RenderDrawLines(renderer, curve_points, CURVE);
 
     SDL_RenderPresent(renderer);
     frametime = SDL_GetTicks64() - framestart;
