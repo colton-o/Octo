@@ -28,10 +28,12 @@ tentacle tentacles[8] = {0};
 SDL_Rect *octopus;
 
 void set_tentacle(tentacle *t) {
-  t->tentacle_pos.a.x = octopus->x;
-  t->tentacle_pos.a.x = octopus->x;
   t->tentacle_pos.d.x = octopus->x + t->orig_pos.x;
   t->tentacle_pos.d.y = octopus->y + t->orig_pos.y;
+  t->tentacle_pos.c.x = (t->tentacle_pos.a.x + t->tentacle_pos.d.x) / 2;
+  t->tentacle_pos.c.y= (t->tentacle_pos.a.y + t->tentacle_pos.d.y) / 2;
+  t->tentacle_pos.b.x = (t->tentacle_pos.c.x + t->tentacle_pos.d.x) / 2;
+  t->tentacle_pos.b.y = (t->tentacle_pos.c.y + t->tentacle_pos.d.y) / 2;
 }
 void set_tentacle_distance(tentacle *t) {
   t->distance = sqrt(pow(t->tentacle_pos.d.x - (octopus->x), 2) +
@@ -131,6 +133,8 @@ int main(void) {
     SDL_RenderFillRect(renderer, octopus);
 
     for (int i = 0; i < 8; i++) {
+      tentacles[i].tentacle_pos.a.x = octopus->x + (octopus->w / 2);
+      tentacles[i].tentacle_pos.a.y = octopus->y + (octopus->h / 2);
       set_tentacle_distance(&tentacles[i]);
 
       if (tentacles[i].distance > 300 || tentacles[i].distance < 1)
