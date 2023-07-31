@@ -25,6 +25,7 @@ typedef struct {
   vector_2 orig_pos;
   curve tentacle_pos;
   int distance;
+  uint8_t pulling;
 } tentacle;
 
 tentacle tentacles[8] = {0};
@@ -135,8 +136,10 @@ int main(int argc, char *argv[]) {
 
     // octopus->x += velocity.x * speed;
     // octopus->y += velocity.y * speed;
-
-    tentacles[0].tentacle_pos.d.y += velocity.y * speed;
+    if (velocity.y < 0)
+      tentacles[0].tentacle_pos.d.y += velocity.y * speed;
+    else
+      tentacles[4].tentacle_pos.d.y += velocity.y * speed;
 
     SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
     SDL_RenderClear(renderer);
