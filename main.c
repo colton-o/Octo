@@ -135,11 +135,35 @@ int main(int argc, char *argv[]) {
     }
 
     // octopus->x += velocity.x * speed;
-    // octopus->y += velocity.y * speed;
-    if (velocity.y < 0)
-      tentacles[0].tentacle_pos.d.y += velocity.y * speed;
-    else
-      tentacles[4].tentacle_pos.d.y += velocity.y * speed;
+
+    if (velocity.y < 0) {
+      if (tentacles[0].pulling) {
+        octopus->y += velocity.y * speed;
+        if (tentacles[4].pulling && tentacles[4].distance > 300) {
+          tentacles[4].tentacle_pos.d.y += velocity.y * speed * 2;
+        }
+      } else
+        tentacles[0].tentacle_pos.d.y += velocity.y * speed;
+    } else {
+      if (tentacles[4].pulling) octopus->y += velocity.y * speed;
+
+      if (tentacles[0].pulling && tentacles[0].distance > 300) {
+        tentacles[0].tentacle_pos.d.y += velocity.y * speed * 2;
+      } else
+        tentacles[4].tentacle_pos.d.y += velocity.y * speed;
+    }
+
+    if (velocity.x < 0) {
+      if (tentacles[6].pulling)
+        octopus->x += velocity.x * speed;
+      else
+        tentacles[6].tentacle_pos.d.x += velocity.x * speed;
+    } else {
+      if (tentacles[2].pulling)
+        octopus->x += velocity.x * speed;
+      else
+        tentacles[2].tentacle_pos.d.x += velocity.x * speed;
+    }
 
     SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
     SDL_RenderClear(renderer);
@@ -150,6 +174,10 @@ int main(int argc, char *argv[]) {
       tentacles[i].tentacle_pos.a.x = octopus->x + (octopus->w / 2);
       tentacles[i].tentacle_pos.a.y = octopus->y + (octopus->h / 2);
       set_tentacle_distance(&tentacles[i]);
+      if (tentacles[i].distance > 200)
+        tentacles[i].pulling = 1;
+      else if (tentacles[i].distance < 10)
+        tentacles[i].pulling = 0;
 
       set_tentacle(&tentacles[i]);
 
