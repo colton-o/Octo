@@ -1,2 +1,2 @@
 main:main.c
-	cc main.c bezier.c -lSDL2 -lm -o octo -g
+	cc main.c bezier.c debug.c -lSDL2 -lSDL2_ttf -lm -o octo -g

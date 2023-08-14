@@ -16,6 +16,7 @@ int speed = 5;
 SDL_Point curve_points[CURVE] = {0};
 
 #include "bezier.h"
+#include "debug.h"
 
 fvector_2 velocity;
 vector_2 position;
@@ -99,7 +100,7 @@ int main(int argc, char *argv[]) {
   SDL_RenderClear(renderer);
   SDL_Event event;
 
-  // debug_start();
+  debug_start();
   while (1) {
     framestart = SDL_GetTicks64();
     while (SDL_PollEvent(&event)) {
@@ -183,14 +184,12 @@ int main(int argc, char *argv[]) {
       SDL_RenderDrawLines(renderer, curve_points_neg, CURVE);
       SDL_RenderDrawLines(renderer, curve_points_pos, CURVE);
     }
-
+    debug_update(renderer);
     SDL_RenderPresent(renderer);
     frametime = SDL_GetTicks64() - framestart;
     if (SCREEN_TICK > frametime) {
       SDL_Delay(SCREEN_TICK - frametime);
     }
-
-    // debug_update(renderer, tentacles);
   }
   free(octopus);
   SDL_DestroyRenderer(renderer);
