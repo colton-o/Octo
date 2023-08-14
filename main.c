@@ -18,8 +18,11 @@ int speed = 5;
 
 SDL_Point curve_points[CURVE] = {0};
 
-vector_2 velocity;
+fvector_2 velocity;
 vector_2 position;
+vector_2 click_pos;
+vector_2 direction;
+float length;
 
 typedef struct {
   vector_2 orig_pos;
@@ -51,6 +54,8 @@ int main(int argc, char *argv[]) {
   octopus->w = 25;
   octopus->x = WINX / 2;
   octopus->y = WINY / 2;
+  click_pos.x = octopus->x;
+  click_pos.y = octopus->y;
 
   tentacles[0].orig_pos.x = 0;
   tentacles[0].orig_pos.y = -100;
@@ -98,43 +103,21 @@ int main(int argc, char *argv[]) {
     framestart = SDL_GetTicks64();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
-        case SDL_KEYDOWN:
-          switch (event.key.keysym.sym) {
-            case SDLK_w:
-              velocity.y = -1;
-              break;
-            case SDLK_s:
-              velocity.y = 1;
-              break;
-            case SDLK_a:
-              velocity.x = -1;
-              break;
-            case SDLK_d:
-              velocity.x = 1;
-              break;
-          }
-          break;
-        case SDL_KEYUP:
-          switch (event.key.keysym.sym) {
-            case SDLK_w:
-              velocity.y = 0;
-              break;
-            case SDLK_s:
-              velocity.y = 0;
-              break;
-            case SDLK_a:
-              velocity.x = 0;
-              break;
-            case SDLK_d:
-              velocity.x = 0;
-              break;
-          }
+        case SDL_MOUSEBUTTONDOWN:
+          SDL_GetMouseState(&click_pos.x, &click_pos.y);
+
           break;
       }
       if (event.type == SDL_QUIT) return 0;
     }
 
     // octopus->x += velocity.x * speed;
+    direction.x = click_pos.x - octopus->x;
+    direction.y = click_pos.y - octopus->y;
+    length = sqrt(pow(direction.x, 2) + pow(direction.y, 2));
+    if (direction.x != 0) velocity.x = direction.x / length;
+
+    if (direction.y != 0) velocity.y = direction.y / length;
 
     if (velocity.y < 0) {
       if (tentacles[0].pulling) {
