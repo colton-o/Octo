@@ -4,9 +4,6 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <math.h>
-
-#include "bezier.h"
-
 #define WINX 1000
 #define WINY 1000
 #define CURVE 100
@@ -17,6 +14,8 @@ const int SCREEN_TICK = 1000 / 60;
 int speed = 5;
 
 SDL_Point curve_points[CURVE] = {0};
+
+#include "bezier.h"
 
 fvector_2 velocity;
 vector_2 position;
@@ -99,6 +98,8 @@ int main(int argc, char *argv[]) {
   SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
   SDL_RenderClear(renderer);
   SDL_Event event;
+
+  // debug_start();
   while (1) {
     framestart = SDL_GetTicks64();
     while (SDL_PollEvent(&event)) {
@@ -158,9 +159,9 @@ int main(int argc, char *argv[]) {
       tentacles[i].tentacle_pos.a.y = octopus->y + (octopus->h / 2);
       set_tentacle_distance(&tentacles[i]);
       if (tentacles[i].distance > 200)
-        tentacles[i].pulling = 1;
-      else if (tentacles[i].distance < 10)
         tentacles[i].pulling = 0;
+      else if (tentacles[i].distance < 10)
+        tentacles[i].pulling = 1;
 
       set_tentacle(&tentacles[i]);
 
@@ -188,6 +189,8 @@ int main(int argc, char *argv[]) {
     if (SCREEN_TICK > frametime) {
       SDL_Delay(SCREEN_TICK - frametime);
     }
+
+    // debug_update(renderer, tentacles);
   }
   free(octopus);
   SDL_DestroyRenderer(renderer);

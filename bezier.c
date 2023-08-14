@@ -1,4 +1,5 @@
 #include "bezier.h"
+
 #include <math.h>
 
 void set_curve(curve _curve, int points, SDL_Point *curve_points) {
