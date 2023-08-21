@@ -1,5 +1,6 @@
 
-
+#ifndef HEADER_GUARD
+#define HEADER_GUARD
 typedef struct {
   int x;
   int y;
@@ -9,3 +10,4 @@ typedef struct {
   float x;
   float y;
 } fvector_2;
+#endif

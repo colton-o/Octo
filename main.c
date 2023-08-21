@@ -24,12 +24,6 @@ vector_2 click_pos;
 vector_2 direction;
 float length;
 
-typedef struct {
-  vector_2 orig_pos;
-  curve tentacle_pos;
-  int distance;
-  uint8_t pulling;
-} tentacle;
 
 tentacle tentacles[8] = {0};
 SDL_Rect *octopus;
@@ -105,21 +99,24 @@ int main(int argc, char *argv[]) {
     framestart = SDL_GetTicks64();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
-        case SDL_MOUSEBUTTONDOWN:
-          SDL_GetMouseState(&click_pos.x, &click_pos.y);
+      case SDL_MOUSEBUTTONDOWN:
+        SDL_GetMouseState(&click_pos.x, &click_pos.y);
 
-          break;
+        break;
       }
-      if (event.type == SDL_QUIT) return 0;
+      if (event.type == SDL_QUIT)
+        return 0;
     }
 
     // octopus->x += velocity.x * speed;
     direction.x = click_pos.x - octopus->x;
     direction.y = click_pos.y - octopus->y;
     length = sqrt(pow(direction.x, 2) + pow(direction.y, 2));
-    if (direction.x != 0) velocity.x = direction.x / length;
+    if (direction.x != 0)
+      velocity.x = direction.x / length;
 
-    if (direction.y != 0) velocity.y = direction.y / length;
+    if (direction.y != 0)
+      velocity.y = direction.y / length;
 
     if (velocity.y < 0) {
       if (tentacles[0].pulling) {
@@ -130,7 +127,8 @@ int main(int argc, char *argv[]) {
       } else
         tentacles[0].tentacle_pos.d.y += velocity.y * speed;
     } else {
-      if (tentacles[4].pulling) octopus->y += velocity.y * speed;
+      if (tentacles[4].pulling)
+        octopus->y += velocity.y * speed;
 
       if (tentacles[0].pulling && tentacles[0].distance > 300) {
         tentacles[0].tentacle_pos.d.y += velocity.y * speed * 2;
@@ -184,7 +182,7 @@ int main(int argc, char *argv[]) {
       SDL_RenderDrawLines(renderer, curve_points_neg, CURVE);
       SDL_RenderDrawLines(renderer, curve_points_pos, CURVE);
     }
-    debug_update(renderer);
+    debug_update(renderer, tentacles);
     SDL_RenderPresent(renderer);
     frametime = SDL_GetTicks64() - framestart;
     if (SCREEN_TICK > frametime) {
